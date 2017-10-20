@@ -28,7 +28,7 @@
 #include "video_modes.h"
 #include "flash.h"
 
-#define MAX_PROFILE 9
+#define MAX_PROFILE 11
 #define INIT_CONFIG_SLOT MAX_USERDATA_ENTRY
 
 typedef enum {
@@ -46,7 +46,9 @@ typedef struct {
 typedef struct {
     ude_hdr hdr;
     alt_u16 data_len;
-    alt_u8 last_profile;
+    //alt_u8 last_profile;
+    alt_u8 last_profile[3];
+    alt_u8 profile_mode;
     avinput_t last_input;
     alt_u16 keys[REMOTE_MAX_KEYS];
 } __attribute__((packed, __may_alias__)) ude_initcfg;

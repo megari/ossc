@@ -41,7 +41,7 @@ extern mode_data_t video_modes[];
 extern alt_u16 tc_h_samplerate, tc_h_synclen, tc_h_bporch, tc_h_active, tc_v_synclen, tc_v_bporch, tc_v_active;
 extern alt_u32 remote_code;
 extern alt_u16 rc_keymap[REMOTE_MAX_KEYS];
-extern alt_u8 vm_sel, profile_sel, lt_sel;
+extern alt_u8 vm_sel, profile_sel, lt_sel, profile_mode;
 
 alt_u8 menu_active;
 
@@ -64,6 +64,7 @@ static const char *sl_type_desc[] = { LNG("Horizontal","ﾖｺ"), LNG("Vertical"
 static const char *sl_id_desc[] = { LNG("Top","ｳｴ"), LNG("Bottom","ｼﾀ") };
 static const char *audio_dw_sampl_desc[] = { LNG("Off (fs = 96kHz)","ｵﾌ (fs = 96kHz)"), "2x  (fs = 48kHz)" };
 static const char *lt_desc[] = { "Top-left", "Center", "Bottom-right" };
+static const char *profile_mode_desc[] = { "General", "Input specific" };
 
 static void sampler_phase_disp(alt_u8 v) { sniprintf(menu_row2, LCD_ROW_LEN+1, LNG("%d deg","%d ﾄﾞ"), (v*1125)/100); }
 static void sync_vth_disp(alt_u8 v) { sniprintf(menu_row2, LCD_ROW_LEN+1, "%d mV", (v*1127)/100); }
@@ -173,6 +174,7 @@ MENU(menu_main, P99_PROTECT({ \
     { LNG("Post-proc.     >","ｱﾄｼｮﾘ         >"),  OPT_SUBMENU,            { .sub = { &menu_postproc, NULL, NULL } } },
     { LNG("Compatibility  >","ｺﾞｶﾝｾｲ        >"), OPT_SUBMENU,             { .sub = { &menu_compatibility, NULL, NULL } } },
     AUDIO_MENU
+    {     "Profile mode   >",                 OPT_AVCONFIG_SELECTION,   { .sel = { &profile_mode, OPT_WRAP, SETTING_ITEM(profile_mode_desc) } } },
     { LNG("<Load profile >","<ﾌﾟﾛﾌｧｲﾙﾛｰﾄﾞ    >"), OPT_FUNC_CALL,          { .fun = { load_profile, &profile_arg_info } } },
     { LNG("<Save profile >","<ﾌﾟﾛﾌｧｲﾙｾｰﾌﾞ    >"), OPT_FUNC_CALL,          { .fun = { save_profile, &profile_arg_info } } },
     { LNG("<Reset settings>","<ｾｯﾃｲｵｼｮｷｶ    >"),  OPT_FUNC_CALL,          { .fun = { set_default_avconfig, NULL } } },

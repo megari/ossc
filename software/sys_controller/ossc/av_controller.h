@@ -70,6 +70,11 @@ typedef enum {
     AV_LAST         = 10
 } avinput_t;
 
+// Table for converting AVx_y to AVx
+static const alt_u8 avinput_to_avx[] = {
+    -1, 0, 0, 0, 1, 1, 2, 2, 2, 2, -1
+};
+
 // In reverse order of importance
 typedef enum {
     NO_CHANGE           = 0,

@@ -31,6 +31,7 @@ extern mode_data_t video_modes[];
 extern avinput_t target_mode;
 extern alt_u8 update_cur_vm;
 extern alt_u8 profile_sel;
+extern alt_u8 profile_mode;
 
 int write_userdata(alt_u8 entry)
 {
@@ -53,7 +54,8 @@ int write_userdata(alt_u8 entry)
     switch (((ude_hdr*)databuf)->type) {
     case UDE_INITCFG:
         ((ude_initcfg*)databuf)->data_len = sizeof(ude_initcfg) - offsetof(ude_initcfg, last_profile);
-        ((ude_initcfg*)databuf)->last_profile = profile_sel;
+        memcpy(((ude_initcfg*)databuf)->last_profile, profile_sel, sizeof(profile_sel));
+        ((ude_initcfg*)databuf)->profile_mode = profile_mode;
         ((ude_initcfg*)databuf)->last_input = cm.avinput;
         memcpy(((ude_initcfg*)databuf)->keys, rc_keymap, sizeof(rc_keymap));
         retval = write_flash_page(databuf, sizeof(ude_initcfg), (USERDATA_OFFSET+entry*SECTORSIZE)/PAGESIZE);
@@ -133,8 +135,16 @@ int read_userdata(alt_u8 entry)
     switch (((ude_hdr*)databuf)->type) {
     case UDE_INITCFG:
         if (((ude_initcfg*)databuf)->data_len == sizeof(ude_initcfg) - offsetof(ude_initcfg, last_profile)) {
-            if (((ude_initcfg*)databuf)->last_profile <= MAX_PROFILE)
-                profile_sel = ((ude_initcfg*)databuf)->last_profile;
+            profile_mode = !!((ude_initcfg*)databuf)->profile_mode;
+            for (alt_u8 i = 0; i < 3; ++i) {
+                const alt_u8 profile = ((ude_initcfg*)databuf)->last_profile[i];
+                const alt_u8 profile_min = profile_mode ? (i * 4) : 0;
+                const alt_u8 profile_max = profile_mode ? (profile_min + 4 - 1) : MAX_PROFILE;
+                if (profile >= profile_min && profile <= profile_max)
+                    profile_sel[i] = ((ude_initcfg*)databuf)->last_profile[i];
+                else
+                    profile_sel[i] = i * 4;
+            }
             if (((ude_initcfg*)databuf)->last_input < AV_LAST)
                 target_mode = ((ude_initcfg*)databuf)->last_input;
             memcpy(rc_keymap, ((ude_initcfg*)databuf)->keys, sizeof(rc_keymap));
