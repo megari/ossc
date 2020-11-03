@@ -487,9 +487,7 @@
   <parameter name="useShallowMemBlocks" value="false" />
   <parameter name="writable" value="true" />
  </module>
- <module name="osd_generator_0" kind="osd_generator" version="1.0" enabled="1">
-  <parameter name="USE_MEMORY_BLOCKS" value="1" />
- </module>
+ <module name="osd_generator_0" kind="osd_generator" version="1.0" enabled="1" />
  <module name="pio_0" kind="altera_avalon_pio" version="20.1" enabled="1">
   <parameter name="bitClearingEdgeCapReg" value="false" />
   <parameter name="bitModifyingOutReg" value="false" />
