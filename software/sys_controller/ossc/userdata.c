@@ -319,21 +319,10 @@ sd_disable:
 
 int export_userdata()
 {
-    int retval, i;
+    int retval;
     char *errmsg;
     alt_u8 databuf[SD_BLK_SIZE];
     alt_u32 btn_vec;
-    alt_u32 bytes_to_rw;
-
-#ifdef CHECK_STACK_USE
-    // estimate stack usage, assuming around here is the worst case (due to 512B databuf)
-    alt_u32 sp;
-    asm volatile("mov %0, sp" : "=r"(sp));
-    sniprintf(menu_row1, LCD_ROW_LEN+1, "Stack size:");
-    sniprintf(menu_row2, LCD_ROW_LEN+1, "%lu bytes", (ONCHIP_MEMORY2_0_BASE+ONCHIP_MEMORY2_0_SIZE_VALUE)-sp);
-    ui_disp_menu(1);
-    usleep(1000000);
-#endif
 
     retval = check_sdcard(databuf);
     SPI_CS_High();
@@ -342,22 +331,6 @@ int export_userdata()
         goto failure;
     }
 
-#if 0
-    retval = check_fw_header(databuf, &fw_header);
-    if (retval != 0)
-        goto failure;
-#endif
-
-#if 0
-    sniprintf(menu_row1, LCD_ROW_LEN+1, "Validating data");
-    sniprintf(menu_row2, LCD_ROW_LEN+1, "%u bytes", (unsigned)fw_header.data_len);
-    ui_disp_menu(1);
-    retval = check_fw_image(512, fw_header.data_len, fw_header.data_crc, databuf);
-    if (retval != 0)
-        goto failure;
-
-    sniprintf(menu_row1, LCD_ROW_LEN+1, "%u.%.2u%s%s", fw_header.version_major, fw_header.version_minor, (fw_header.version_suffix[0] == 0) ? "" : "-", fw_header.version_suffix);
-#endif
     strncpy(menu_row1, "Profile export", LCD_ROW_LEN+1);
     strncpy(menu_row2, "Export? 1=Y, 2=N", LCD_ROW_LEN+1);
     ui_disp_menu(1);
