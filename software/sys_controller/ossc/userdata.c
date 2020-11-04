@@ -379,7 +379,7 @@ int export_userdata()
     menu_row2[0] = '\0';
     ui_disp_menu(1);
 
-    /* This may wear the SD card a  bit more than necessary... */
+    /* This may wear the SD card a bit more than necessary... */
     retval = copy_flash_to_sd(USERDATA_OFFSET/PAGESIZE, 512/SD_BLK_SIZE, MAX_USERDATA_ENTRY * SECTORSIZE, databuf);
     if (retval != 0)
         goto failure;
