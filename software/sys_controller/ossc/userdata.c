@@ -341,7 +341,7 @@ int export_userdata()
         if (btn_vec == rc_keymap[RC_BTN1]) {
             break;
         } else if (btn_vec == rc_keymap[RC_BTN2]) {
-            retval = FW_UPD_CANCELLED;
+            retval = UDATA_EXPT_CANCELLED;
             goto failure;
         }
 
