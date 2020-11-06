@@ -17,6 +17,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+#include <errno.h>
 #include <string.h>
 #include <unistd.h>
 #include "userdata.h"
@@ -331,9 +332,8 @@ int export_userdata()
         goto failure;
     }
 
-    strncpy(menu_row1, "Profile export", LCD_ROW_LEN+1);
     strncpy(menu_row2, "Export? 1=Y, 2=N", LCD_ROW_LEN+1);
-    ui_disp_menu(1);
+    ui_disp_menu(2);
 
     while (1) {
         btn_vec = IORD_ALTERA_AVALON_PIO_DATA(PIO_1_BASE) & RC_MASK;
@@ -348,9 +348,8 @@ int export_userdata()
         usleep(WAITLOOP_SLEEP_US);
     }
 
-    strncpy(menu_row1, "Exporting", LCD_ROW_LEN+1);
-    menu_row2[0] = '\0';
-    ui_disp_menu(1);
+    strncpy(menu_row2, "Exporting...", LCD_ROW_LEN+1);
+    ui_disp_menu(2);
 
     /* This may wear the SD card a bit more than necessary... */
     retval = copy_flash_to_sd(USERDATA_OFFSET/PAGESIZE, 512/SD_BLK_SIZE, (MAX_USERDATA_ENTRY + 1) * SECTORSIZE, databuf);
@@ -360,9 +359,8 @@ int export_userdata()
     SPI_CS_High();
 
     strncpy(menu_row2, "Success", LCD_ROW_LEN+1);
-    ui_disp_menu(1);
 
-    return 0;
+    return 1;
 
 failure:
     SPI_CS_High();
@@ -371,17 +369,21 @@ failure:
         case SD_NOINIT:
             errmsg = "No SD card det.";
             break;
+        case -EINVAL:
+            errmsg = "Invalid params.";
+            break;
         case UDATA_EXPT_CANCELLED:
-            errmsg = "Export cancelled";
+            errmsg = "Cancelled";
             break;
         default:
             errmsg = "SD/Flash error";
             break;
     }
     strncpy(menu_row2, errmsg, LCD_ROW_LEN+1);
-    ui_disp_menu(1);
-    usleep(1000000);
 
-    render_osd_page();
-    return -1;
+    /*
+     * We want the message above to remain on screen, so return a
+     * positive value which nevertheless stands out when debugging.
+     */
+    return 0x0dead;
 }
