@@ -18,6 +18,6 @@ bin2hex: bin2hex.c
 	$(CC) bin2hex.c -o bin2hex
 
 create_fw_img: create_fw_img.c
-	gcc create_fw_img.c -o create_fw_img
+	gcc -Wall -Wextra -Wcast-align create_fw_img.c -o create_fw_img
 
 # vim: set noet ts=2 sw=2 sts=2
