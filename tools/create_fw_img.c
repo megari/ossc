@@ -136,7 +136,10 @@ int main(int argc, char **argv)
     snprintf(hdrbuf, FW_KEY_SIZE+1, "OSSC");
     hdrbuf[4] = (uint8_t)fw_version_major;
     hdrbuf[5] = (uint8_t)fw_version_minor;
-    snprintf(hdrbuf+6, FW_SUFFIX_MAX_SIZE+1, (argc == 4) ? argv[3] : "");
+    if (argc == 4)
+        strncpy(hdrbuf+6, argv[3], FW_SUFFIX_MAX_SIZE+1);
+    else
+        hdrbuf[6] = (uint8_t)'\0';
     *((uint32_t*)(hdrbuf+6+FW_SUFFIX_MAX_SIZE)) = htonl(FW_HDR_LEN);
     *((uint32_t*)(hdrbuf+6+FW_SUFFIX_MAX_SIZE+4)) = htonl((uint32_t)fileinfo.st_size);
 
@@ -156,7 +159,7 @@ int main(int argc, char **argv)
         return -1; 
     }
 
-    printf("version %u.%u%s%s: %u bytes\n", fw_version_major, fw_version_minor, (argc == 4) ? "-" : "", hdrbuf+6, fileinfo.st_size);
+    printf("version %u.%u%s%s: %u bytes\n", fw_version_major, fw_version_minor, (argc == 4) ? "-" : "", hdrbuf+6, (unsigned)fileinfo.st_size);
     printf("Header CRC32: %.8x\n", hdr_crc);
     printf("Data CRC32: %.8x\n", crc);
 
