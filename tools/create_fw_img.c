@@ -97,8 +97,6 @@ uint32_t crc32(uint32_t crc, const void *buf, size_t size)
 
 int main(int argc, char **argv)
 {
-    unsigned char block;
-    
     int fd_i, fd_o;
     struct stat fileinfo;
     char fw_bin_name[MAX_FILENAME];
@@ -109,7 +107,7 @@ int main(int argc, char **argv)
     uint32_t hdr_crc;
     uint32_t crc = 0;
     
-    unsigned int i, bytes_read, bytes_written, tot_bytes_read = 0;
+    unsigned int bytes_read, bytes_written, tot_bytes_read = 0;
     
     if ((argc < 3) || (argc > 4)) {
         printf("Usege: %s rbf version [version_suffix]\n", argv[0]);
