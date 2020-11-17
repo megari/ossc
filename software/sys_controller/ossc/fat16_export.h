@@ -72,6 +72,6 @@ void generate_boot_sector_16(alt_u8 *buf);
  * The number of clusters already written are given as an argument.
  * The function returns the total number of clusters written so far.
  */
-alt_u16 generate_fat16(alt_u8 *fat, alt_u16 written);
+alt_u16 generate_fat16(void *buf, alt_u16 written);
 
 #endif // FAT16_EXPORT_H_
