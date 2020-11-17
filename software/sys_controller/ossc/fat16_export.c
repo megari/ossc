@@ -3,15 +3,13 @@
 
 /*
  * The beginning of the boot sector. Will be followed by the BPB.
- * Offsets 0x000 to 0x01c, inclusive.
+ * Offsets 0x003 to 0x01c, inclusive.
  * The BPB spans offsets 0x00b to 0x01c, inclusive.
  */
-static const alt_u8 bootsec_beg_bpb_16[27] = {
-    0xeb, 0x00, 0x90, 0x4d, 0x53, 0x57, 0x49, 0x4e,
-/*   ^-----------^--- Maybe zero these? */
-    0x34, 0x2e, 0x31, 0x00, 0x02, 0x04, 0x80, 0x00,
-    0x02, 0x00, 0x08, 0x00, 0x80, 0xf8, 0x20, 0x00,
-    0x3f, 0x00, 0xff,
+static const alt_u8 bootsec_beg_bpb_16[24] = {
+    0x4d, 0x53, 0x57, 0x49, 0x4e, 0x34, 0x2e, 0x31,
+    0x00, 0x02, 0x04, 0x80, 0x00, 0x02, 0x00, 0x08,
+    0x00, 0x80, 0xf8, 0x20, 0x00, 0x3f, 0x00, 0xff,
 };
 
 /*
@@ -35,14 +33,15 @@ static const alt_u8 bootsec_after_bpb_16[26] = {
  */
 void generate_boot_sector_16(alt_u8 *const buf) {
     /* Initial FAT16 boot sector contents. */
-    memcpy(buf, bootsec_beg_bpb_16, 27);
+    memcpy(buf + 3, bootsec_beg_bpb_16, 24);
 
     /*
      * Then the rest of the boot sector.
      * The boot code is just 448 bytes of 0xf4.
      */
     memcpy(buf + 36, bootsec_after_bpb_16, 26);
-    memset(buf + 62, 0xf4, 448);
+
+    /* Leave the boot code zeroed out. Ugly, but should decrease code size. */
 
     /* RISC-V is little-endian, so do a 16-bit write instead. */
     *((alt_u16*)(buf + 510)) = 0xaa55U;
