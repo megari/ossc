@@ -69,6 +69,9 @@ typedef struct _SD_DEV {
 #define CMD16   (0x40+16)       /* SET_BLOCKLEN             */
 #define CMD17   (0x40+17)       /* READ_SINGLE_BLOCK        */
 #define CMD24   (0x40+24)       /* WRITE_SINGLE_BLOCK       */
+#define CMD32   (0x40+32)       /* ERASE WR BLOCK START ADDR*/
+#define CMD33   (0x40+33)       /* ERASE WR BLOCK END ADDR  */
+#define CMD38   (0x40+38)       /* ERASE                    */
 #define CMD42   (0x40+42)       /* LOCK_UNLOCK              */
 #define CMD55   (0x40+55)       /* APP_CMD                  */
 #define CMD58   (0x40+58)       /* READ_OCR                 */
@@ -135,6 +138,8 @@ SDRESULTS SD_Init (SD_DEV *dev);
     \return If all goes well returns SD_OK.
  */
 SDRESULTS SD_Read (SD_DEV *dev, void *dat, DWORD sector, WORD ofs, WORD cnt);
+
+SDRESULTS SD_Erase(SD_DEV *dev, DWORD start_sector, DWORD count);
 
 /**
     \brief Write a single block.

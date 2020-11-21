@@ -424,6 +424,36 @@ SDRESULTS SD_Read(SD_DEV *dev, void *dat, DWORD sector, WORD ofs, WORD cnt)
 }
 
 #ifdef SD_IO_WRITE
+SDRESULTS SD_Erase(SD_DEV *dev, DWORD start_sector, DWORD count)
+{
+    // Query ok?
+    if((start_sector + count - 1) > dev->last_sector) return(SD_PARERR);
+    // Convert sector number to byte address (sector * SD_BLK_SIZE) for SDC1
+    if (!(dev->cardtype & SDCT_BLOCK)) {
+        start_sector *= SD_BLK_SIZE;
+        count *= SD_BLK_SIZE;
+    }
+
+    // Multiple block erase
+    if(__SD_Send_Cmd(CMD32, start_sector) != 0)
+        return(SD_ERROR);
+    if(__SD_Send_Cmd(CMD33, start_sector + count - 1) != 0)
+        return(SD_ERROR);
+    if(__SD_Send_Cmd(CMD38, 0) != 0)
+        return(SD_ERROR);
+
+    // Have not figured the correct time to wait yet...
+#if 1
+    SPI_Timer_On(5000);  // Wait for data packet (timeout of 5s (sic!))
+    while((SPI_RW(0xFF) == 0) && (SPI_Timer_Status() == TRUE));
+    SPI_Timer_Off();
+#else
+    while(SPI_RW(0xFF)==0);
+#endif
+
+    return SD_OK;
+}
+
 SDRESULTS SD_Write(SD_DEV *dev, void *dat, DWORD sector)
 {
 #if defined(_M_IX86)    // x86
