@@ -2,14 +2,18 @@
 #include "fat16_export.h"
 
 /*
- * The beginning of the boot sector. Will be followed by the BPB.
- * Offsets 0x003 to 0x01c, inclusive.
- * The BPB spans offsets 0x00b to 0x01c, inclusive.
+ * The beginning of the boot sector, along with the BPB.
+ * Volume offsets 0x003 to 0x01a, inclusive.
+ * The BPB spans volume offsets 0x00b to 0x01c, inclusive.
+ *
+ * The jump instruction at volume offsets 0x000 to 0x002, inclusive,
+ * is left zeroed out to save a tiny bit of space.
  */
 static const alt_u8 bootsec_beg_bpb_16[24] = {
-    0x4d, 0x53, 0x57, 0x49, 0x4e, 0x34, 0x2e, 0x31,
-    0x00, 0x02, 0x04, 0x80, 0x00, 0x02, 0x00, 0x08,
-    0x00, 0x80, 0xf8, 0x20, 0x00, 0x3f, 0x00, 0xff,
+    /* Three zeros */ 0x4d, 0x53, 0x57, 0x49, 0x4e, /* 0x003...0x007 */
+    0x34, 0x2e, 0x31, 0x00, 0x02, 0x04, 0x80, 0x00, /* 0x008...0x00f */
+    0x02, 0x00, 0x08, 0x00, 0x80, 0xf8, 0x20, 0x00, /* 0x010...0x017 */
+    0x3f, 0x00, 0xff, /* Zeros until 0x024       */ /* 0x018...0x01a */
 };
 
 /*
@@ -17,14 +21,16 @@ static const alt_u8 bootsec_beg_bpb_16[24] = {
  * Offsets 0x024 to 0x03d, inclusive.
  */
 static const alt_u8 bootsec_after_bpb_16[26] = {
-    0x80, 0x00, 0x29, 0xf4, 0xcf, 0xc6, 0x04, 0x4f, 0x53, 0x53, 0x43, 0x50,
-    0x52, 0x4f, 0x46, 0x49, 0x4c, 0x53, 0x46, 0x41, 0x54, 0x31, 0x36, 0x20,
-    0x20, 0x20,
+    /* Zeros             */ 0x80, 0x00, 0x29, 0xf4, /* 0x024...0x027 */
+    0xcf, 0xc6, 0x04, 0x4f, 0x53, 0x53, 0x43, 0x50, /* 0x028...0x02f */
+    0x52, 0x4f, 0x46, 0x49, 0x4c, 0x53, 0x46, 0x41, /* 0x030...0x037 */
+    0x54, 0x31, 0x36, 0x20, 0x20, 0x20, /* Zeros */ /* 0x038...0x03d */
 };
 
 /*
  * After this, we have the boot code (448 bytes) and sector terminator
- * (2 bytes). These will be generated.
+ * (2 bytes). The former will be left zeroed-out and the latter will
+ * be generated.
  */
 
 /* Generates a FAT16 boot sector.
@@ -32,16 +38,18 @@ static const alt_u8 bootsec_after_bpb_16[26] = {
  * and is assumed to be pre-zeroed.
  */
 void generate_boot_sector_16(alt_u8 *const buf) {
-    /* Initial FAT16 boot sector contents. */
+    /* Initial FAT16 boot sector contents + the BPB. */
     memcpy(buf + 3, bootsec_beg_bpb_16, 24);
 
     /*
      * Then the rest of the boot sector.
-     * The boot code is just 448 bytes of 0xf4.
+     *
+     * The boot code is supposed to be 448 bytes filled with 0xf4,
+     * but leave it zeroed out to keep the code smaller. This may
+     * be a deviation from the FAT16 spec, but should be harmless
+     * for our purposes.
      */
     memcpy(buf + 36, bootsec_after_bpb_16, 26);
-
-    /* Leave the boot code zeroed out. Ugly, but should decrease code size. */
 
     /* RISC-V is little-endian, so do a 16-bit write instead. */
     *((alt_u16*)(buf + 510)) = 0xaa55U;

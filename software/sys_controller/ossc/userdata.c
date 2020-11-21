@@ -416,23 +416,22 @@ eval_button:
     strncpy(menu_row2, "Exporting...", LCD_ROW_LEN+1);
     ui_disp_menu(2);
 
-    /* Generate and write the boot sector. */
+    /* Zero out the boot sector, FATs and root directory. */
     memset(databuf, 0, SD_BLK_SIZE);
+    for (alt_u32 sector = 0;
+        sector < (FAT16_ROOT_DIR_FIRST_SECTOR + FAT16_ROOT_DIR_SECTORS);
+        ++sector)
+    {
+        retval = SD_Write(&sdcard_dev, databuf, sector);
+        if (retval)
+            goto out;
+    }
+
+    /* Generate and write the boot sector. */
     generate_boot_sector_16(databuf);
     retval = SD_Write(&sdcard_dev, databuf, 0);
     if (retval)
         goto out;
-
-    /* Zero out the FAT area */
-    /* TODO: a proper erase would be more ideal... */
-    memset(databuf, 0, SD_BLK_SIZE);
-    for (alt_u32 fat_sector = FAT16_1_OFS/SD_BLK_SIZE;
-        fat_sector < (FAT16_2_OFS + FAT16_SIZE)/SD_BLK_SIZE; ++fat_sector)
-    {
-        retval = SD_Write(&sdcard_dev, databuf, fat_sector);
-        if (retval)
-            goto out;
-    }
 
     /* Generate and write the file allocation tables. */
     for (alt_u16 clusters_written = 0, sd_blk_idx = 0;
