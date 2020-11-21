@@ -43,12 +43,6 @@
 /* On this volume, each FAT will be 16 kiB in size. */
 #define FAT16_SIZE 0x04000UL
 
-/* The first sector of the root directory. */
-#define FAT16_ROOT_DIR_FIRST_SECTOR 192U
-
-/* The length of the root directory in sectors. */
-#define FAT16_ROOT_DIR_SECTORS 128U
-
 /*
  * Define the properties and contents of the directory entry for the
  * settings file.
