@@ -424,6 +424,7 @@ eval_button:
         goto out;
 
     /* Zero out the FAT area */
+#if 0
     /* TODO: a proper erase would be more ideal... */
     memset(databuf, 0, SD_BLK_SIZE);
     for (alt_u32 fat_sector = FAT16_1_OFS/SD_BLK_SIZE;
@@ -433,6 +434,14 @@ eval_button:
         if (retval)
             goto out;
     }
+#else
+    retval = SD_Erase(
+            &sdcard_dev,
+            FAT16_1_OFS/SD_BLK_SIZE,
+            (2 * FAT16_SIZE)/SD_BLK_SIZE);
+    if (retval)
+        goto out;
+#endif
 
     /* Generate and write the file allocation tables. */
     for (alt_u16 clusters_written = 0, sd_blk_idx = 0;
@@ -461,6 +470,29 @@ eval_button:
     retval = SD_Write(&sdcard_dev, databuf, PROF_DIRENT_16_OFS/SD_BLK_SIZE);
     if (retval)
         goto out;
+
+    /* Zero-fill the rest of the root directory. */
+#if 0
+    memset(databuf, 0, SD_BLK_SIZE);
+    for (alt_u16 root_sec = (PROF_DIRENT_16_OFS/SD_BLK_SIZE) + 1;
+        root_sec < (FAT16_ROOT_DIR_FIRST_SECTOR + FAT16_ROOT_DIR_SECTORS);
+        ++root_sec)
+    {
+        retval = SD_Write(&sdcard_dev, databuf, root_sec);
+        if (retval)
+            goto out;
+    }
+#else
+    _Static_assert(
+        (PROF_DIRENT_16_OFS/SD_BLK_SIZE) == FAT16_ROOT_DIR_FIRST_SECTOR,
+        "Root dir not where expected");
+    retval = SD_Erase(
+            &sdcard_dev,
+            (PROF_DIRENT_16_OFS/SD_BLK_SIZE) + 1,
+            FAT16_ROOT_DIR_SECTORS - 1);
+    if (retval)
+        goto out;
+#endif
 
     /* This may wear the SD card a bit more than necessary... */
     retval = copy_flash_to_sd(USERDATA_OFFSET/PAGESIZE,
