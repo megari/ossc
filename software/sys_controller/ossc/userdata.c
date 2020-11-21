@@ -447,9 +447,8 @@ eval_button:
     for (alt_u16 clusters_written = 0, sd_blk_idx = 0;
         clusters_written < (PROF_16_DATA_SIZE/FAT16_CLUSTER_SIZE);)
     {
-        alt_u16 count;
         memset(databuf, 0, SD_BLK_SIZE);
-        count = generate_fat16(databuf, clusters_written);
+        clusters_written = generate_fat16(databuf, clusters_written);
         retval = SD_Write(&sdcard_dev, databuf,
             (FAT16_1_OFS/SD_BLK_SIZE) + sd_blk_idx);
         if (retval)
@@ -461,7 +460,6 @@ eval_button:
             goto out;
 
         ++sd_blk_idx;
-        clusters_written = count;
     }
 
     /* Write the directory entry of the settings file. */

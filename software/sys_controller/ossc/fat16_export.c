@@ -79,7 +79,7 @@ alt_u16 generate_fat16(void *const buf, const alt_u16 written) {
             ? FAT16_ENTRIES_PER_SECTOR
             : clusters_remaining) - preamble_compensation;
     const alt_u16 end_cluster = start_cluster + clusters_to_write;
-    static const alt_u16 last_fat_cluster = PROF_16_CLUSTER_COUNT + 2U;
+    const alt_u16 last_fat_cluster = PROF_16_CLUSTER_COUNT + 2U;
 
     if (!written) {
         *((alt_u32*)fat) = fat16_preamble;
