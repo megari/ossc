@@ -419,7 +419,9 @@ eval_button:
         prompt_state = 3;
     }
 
-    strncpy(menu_row2, "Exporting...", LCD_ROW_LEN+1);
+    strncpy(menu_row2,
+        LNG("Exporting...", "ｵﾏﾁｸﾀﾞｻｲ"),
+        LCD_ROW_LEN+1);
     ui_disp_menu(2);
 
     /* Zero out the boot sector, FATs and root directory. */
@@ -476,19 +478,19 @@ out:
 
     switch (retval) {
         case 0:
-            msg = "Success";
+            msg = LNG("Success", "kanryou");
             break;
         case SD_NOINIT:
-            msg = "No SD card det.";
+            msg = LNG("No SD card det.", "SDkaado?");
             break;
         case -EINVAL:
-            msg = "Invalid params.";
+            msg = LNG("Invalid params.", "parameetaaeraa");
             break;
         case UDATA_EXPT_CANCELLED:
-            msg = "Cancelled";
+            msg = LNG("Cancelled", "kyanseru");
             break;
         default:
-            msg = "SD/Flash error";
+            msg = LNG("SD/Flash error", "SD/FLASHeraa");
             break;
     }
     strncpy(menu_row2, msg, LCD_ROW_LEN+1);
